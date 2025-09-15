@@ -10,20 +10,19 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model ChatSession {
-  id        String      @id @default(cuid())
-  title     String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  messages  ChatMessage[]
+model Chat {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  messages  Message[]
 }
 
-model ChatMessage {
-  id          String      @id @default(cuid())
-  content     String
-  role        String // "user" or "model"
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  session     ChatSession @relation(fields: [sessionId], references: [id])
-  sessionId   String
+model Message {
+  id        String   @id @default(cuid())
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId    String
+  content   String
+  role      String
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
 }

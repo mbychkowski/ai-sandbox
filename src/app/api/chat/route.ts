@@ -1,60 +1,74 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createVertex } from '@ai-sdk/google-vertex';
+import {GoogleGenerativeAIProviderOptions} from '@ai-sdk/google'
+import { streamText, UIMessage, convertToModelMessages, tool, stepCountIs } from 'ai';
+import { z } from 'zod';
 
-const MODEL_NAME = 'gemini-1.5-flash';
+const vertex = createVertex({
+  project: 'prj-kokiri-dev', // optional
+  location: 'us-central1', // optional
+});
+
+const options = {
+  google: {
+    // Options are nested under 'google' for Vertex provider
+    thinkingConfig: {
+      includeThoughts: true,
+      // thinkingBudget: 2048, // Optional
+    },
+  } satisfies GoogleGenerativeAIProviderOptions,
+}
+
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  const { messages }: { messages: UIMessage[] } = await req.json();
+
   try {
-    const { messages, sessionId } = await req.json();
-
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'API key not found' }, { status: 500 });
-    }
-
-    if (!messages) {
-      return NextResponse.json({ error: 'Messages are required' }, { status: 400 });
-    }
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-
-    const lastMessage = messages[messages.length - 1];
-
-    // TODO: Save user message to DB
-    // TODO: Save model response to DB
-
-    const generationConfig = {
-      temperature: 0.9,
-      topK: 1,
-      topP: 1,
-      maxOutputTokens: 2048,
-    };
-
-    const safetySettings = [
-      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-    ];
-
-    const chat = model.startChat({
-      generationConfig,
-      safetySettings,
-      history: messages.slice(0, -1).map((msg: any) => ({
-        role: msg.role,
-        parts: [{ text: msg.content }],
-      })),
+    const result = streamText({
+      model: vertex('gemini-2.5-flash'),
+      stopWhen: stepCountIs(5),
+      tools: {
+        // search: vertex.tools.googleSearch({}),
+        weather: tool({
+          description: 'Get the weather in a location (fahrenheit)',
+          inputSchema: z.object({
+            location: z.string().describe('The location to get the weather for'),
+          }),
+          execute: async ({ location }) => {
+            const temperature = Math.round(Math.random() * (90 - 32) + 32);
+            return {
+              location,
+              temperature,
+            };
+          },
+        }),
+        convertFahrenheitToCelsius: tool({
+          description: 'Convert a temperature in fahrenheit to celsius',
+          inputSchema: z.object({
+            temperature: z
+              .number()
+              .describe('The temperature in fahrenheit to convert'),
+          }),
+          execute: async ({ temperature }) => {
+            const celsius = Math.round((temperature - 32) * (5 / 9));
+            return {
+              celsius,
+            };
+          },
+        }),
+      },
+      providerOptions: options,
+      messages: convertToModelMessages(messages),
     });
 
-    const result = await chat.sendMessage(lastMessage.content);
-    const response = result.response;
-    const text = response.text();
+    if (result.toolCalls && (await result.toolCalls).length > 0) {
+      console.log('Tools were called:', result.toolCalls);
+    }
 
-    return NextResponse.json({ content: text, role: 'model' });
+    return result.toUIMessageStreamResponse();
 
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error in chat API:', error);
+    return new Response('Internal Server Error', { status: 500 });
   }
 }

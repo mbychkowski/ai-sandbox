@@ -1,97 +1,111 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useRef, useState } from "react";
+import { UIMessage } from "ai";
+import { useChat } from "@ai-sdk/react";
 
-interface Message {
-  role: 'user' | 'model';
-  content: string;
-}
-
-export function ChatPanel() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+// The ChatPanel is now a "dumb" component that receives all state and handlers as props
+export function ChatPanel({
+  chatId,
+  initialMessages,
+}: {
+  chatId: string;
+  initialMessages: UIMessage[];
+}) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const [input, setInput] = useState("");
 
-    const newMessages: Message[] = [...messages, { role: 'user', content: input }];
-    setMessages(newMessages);
-    setInput('');
+  const { messages, sendMessage } = useChat({
+    messages: initialMessages
+  });
 
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: newMessages }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      setMessages([...newMessages, data]);
-    } else {
-      // Handle error
-      console.error('API error');
-    }
-  };
-
+  // Auto-scroll to the bottom when new messages arrive
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({
         top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
   }, [messages]);
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setInput(e.target.value);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    sendMessage({ text: input });
+    setInput("");
+  };
+
   return (
-    <Card className="w-full h-full flex flex-col">
-      <CardHeader>
-        <CardTitle>Chat</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="space-y-4 pr-4">
-            {messages.map((message, index) => (
-              <div key={index} className={`flex items-start gap-4 ${message.role === 'user' ? 'justify-end' : ''}`}>
-                {message.role === 'model' && (
-                  <Avatar>
-                    <AvatarFallback>AI</AvatarFallback>
-                  </Avatar>
-                )}
-                <div className={`rounded-lg p-3 max-w-[75%] ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
-                </div>
-                {message.role === 'user' && (
-                  <Avatar>
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
-                )}
+    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex items-start gap-4 ${
+                message.role === "user" ? "justify-end" : ""
+              }`}
+            >
+              {message.role !== "user" && (
+                <Avatar>
+                  <AvatarImage src="/gemini-logo.png" alt="AI" />
+                  <AvatarFallback>AI</AvatarFallback>
+                </Avatar>
+              )}
+              <div
+                className={`rounded-lg p-3 max-w-[75%] ${
+                  message.role === "user"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-800 text-black dark:text-white"
+                }`}
+              >
+                {message.parts.map((part, i) => {
+                  switch (part.type) {
+                    case 'text':
+                      return <div key={`${message.id}-${i}`}>{part.text}</div>;
+                    case 'tool-weather':
+                    case 'tool-convertFahrenheitToCelsius':
+                      return (
+                        <pre key={`${message.id}-${i}`}>
+                          {JSON.stringify(part, null, 2)}
+                        </pre>
+                      );
+                    }
+                  })
+                }
               </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter>
-        <form onSubmit={handleSendMessage} className="flex w-full items-center space-x-2">
+              {message.role === "user" && (
+                <Avatar>
+                  <AvatarFallback>U</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+      <div className="p-4 bg-gray-100 dark:bg-gray-900">
+        <form onSubmit={handleSubmit} className="flex items-center gap-4">
           <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            name="message"
             placeholder="Type your message..."
+            className="flex-1"
+            onChange={handleInputChange}
+            value={input}
           />
           <Button type="submit">Send</Button>
         </form>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

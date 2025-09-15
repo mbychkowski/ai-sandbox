@@ -1,8 +1,12 @@
 # Project Overview
 
-This document serves as a guide for this Next.js project, outlining its structure, conventions, and key technologies. The goal is to provide a clear and concise reference for developers and to serve as a template for future Next.js applications.
+This document serves as a guide for this AI-driven Next.js project, outlining its structure, conventions, and key technologies. The goal is to provide a clear and concise reference for developers, leveraging Google's advanced AI stack including Gemini, Vertex AI, and the Agent Development Kit (ADK) to build intelligent applications.
 
 ## Key Technologies
+
+This project is built on a modern web and AI technology stack.
+
+### Web & Backend
 
 - **Next.js**: A React framework for building full-stack web applications.
 - **React**: A JavaScript library for building user interfaces.
@@ -11,6 +15,18 @@ This document serves as a guide for this Next.js project, outlining its structur
 - **Shadcn/UI**: A collection of reusable UI components.
 - **Prisma**: A next-generation ORM for Node.js and TypeScript.
 - **ESLint**: A pluggable and configurable linter tool for identifying and reporting on patterns in JavaScript.
+
+### AI & Agent Technologies
+
+- **Gemini**: The core family of multimodal AI models from Google used for reasoning, analysis, and content generation.
+- **Vertex AI**: The MLOps platform used to manage, deploy, and scale the Gemini models powering the application.
+- **Agent Development Kit (ADK)**: The framework used to build and orchestrate the application's AI agent, defining its tools, reasoning logic, and core capabilities.
+- **Model Context Protocol (MCP)**: The protocol for managing conversational state and context between the user, the agent, and the UI, ensuring a coherent and stateful user experience.
+- **MCP UI Server SDK for React**: The client-side library used to connect our Next.js frontend to the MCP backend, enabling real-time communication with the AI agent.
+- **Vercel AI SDK**: The primary toolkit for integrating AI features into the application. It consists of:
+  - `ai-sdk/google-vertex`: The provider package used in our backend API routes to connect to and stream from Google's Gemini models on Vertex AI.
+  - `ai-sdk/react`: A set of React hooks (like `useChat` and `useCompletion`) and components for building AI-powered user interfaces.
+  - `ai`: Core functions like `generateText` or `streamText` that require secure credentials should be confined to the backend
 
 ## Getting Started
 
@@ -64,6 +80,7 @@ npm run build
 The project uses ESLint for linting and TypeScript for type-checking. The code is organized into the following directories:
 
 - `src/app`: Contains the pages of the application.
+- `src/agent`: Contains the core logic for the AI agent built with the Agent Development Kit (ADK). This includes tool definitions, prompt configurations, and reasoning modules.
 - `src/components`: Contains reusable UI components. This directory is further organized into:
   - `theme`: Components for managing the application's theme, like the light/dark mode switcher.
   - `ui`: Core UI components, primarily from `shadcn/ui`, such as `Button`, `Card`, and `Separator`.
