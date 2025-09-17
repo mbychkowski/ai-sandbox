@@ -1,7 +1,7 @@
 'use client';
 
 import { Chat } from '@prisma/client';
-import { LucideTrash } from "lucide-react";
+import { LucideTrash } from 'lucide-react';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';

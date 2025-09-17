@@ -1,25 +1,32 @@
-"use client";
+'use client';
 
-import { useChat } from "@ai-sdk/react";
-import { UIMessage } from "ai";
-import { useEffect, useRef, useState } from "react";
+import { useChat } from '@ai-sdk/react';
+import { UIMessage } from 'ai';
+import { SendHorizonal } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
-// The ChatPanel is now a "dumb" component that receives all state and handlers as props
 export function ChatPanel({
   chatId,
   initialMessages,
 }: {
-  chatId: string;
-  initialMessages: UIMessage[];
+  chatId?: string;
+  initialMessages?: UIMessage[];
 }) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
 
   const { messages, sendMessage } = useChat({
     messages: initialMessages
@@ -27,11 +34,9 @@ export function ChatPanel({
 
   // Auto-scroll to the bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop =
+        scrollContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -44,31 +49,37 @@ export function ChatPanel({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     sendMessage({ text: input });
-    setInput("");
+    setInput('');
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-        <div className="space-y-4">
+    <Card className="flex flex-col h-full">
+      <CardHeader>
+        <CardTitle>Gemini</CardTitle>
+        <CardDescription>
+          This is a demo of the Gemini Pro model with the Vercel AI SDK.
+        </CardDescription>
+      </CardHeader>
+      <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6">
+        <div className="flex flex-col gap-4">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex items-start gap-4 ${
-                message.role === "user" ? "justify-end" : ""
+                message.role === 'user' ? 'justify-end' : ''
               }`}
             >
-              {message.role !== "user" && (
+              {message.role !== 'user' && (
                 <Avatar>
-                  <AvatarImage src="/gemini-logo.png" alt="AI" />
-                  <AvatarFallback>AI</AvatarFallback>
+                  <AvatarImage src="/gemini-avatar.png" />
+                  <AvatarFallback>G</AvatarFallback>
                 </Avatar>
               )}
               <div
-                className={`rounded-lg p-3 max-w-[75%] ${
-                  message.role === "user"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 dark:bg-gray-800 text-black dark:text-white"
+                className={`p-4 rounded-lg ${
+                  message.role === 'user'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-800'
                 }`}
               >
                 {message.parts.map((part, i) => {
@@ -86,27 +97,32 @@ export function ChatPanel({
                   })
                 }
               </div>
-              {message.role === "user" && (
+              {message.role === 'user' && (
                 <Avatar>
+                  <AvatarImage src="/user-avatar.png" />
                   <AvatarFallback>U</AvatarFallback>
                 </Avatar>
               )}
             </div>
           ))}
         </div>
-      </ScrollArea>
-      <div className="p-4">
-        <form onSubmit={handleSubmit} className="flex items-center gap-4">
+      </CardContent>
+      <CardFooter className="p-4 border-t">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full flex items-center space-x-2"
+        >
           <Input
-            name="message"
-            placeholder="Type your message..."
-            className="flex-1"
-            onChange={handleInputChange}
             value={input}
+            onChange={handleInputChange}
+            placeholder="Mr Anderson..."
           />
-          <Button type="submit">Send</Button>
+          <Button type="submit" size="icon" disabled={!input.trim()}>
+            <SendHorizonal className="h-4 w-4" />
+            <span className="sr-only">Send</span>
+          </Button>
         </form>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

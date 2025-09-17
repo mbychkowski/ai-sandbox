@@ -1,4 +1,4 @@
-import { ThemeProvider as BaseThemeProvider, ThemeProviderProps as BaseThemeProviderProps } from "next-themes"
+import { ThemeProvider as BaseThemeProvider, ThemeProviderProps as BaseThemeProviderProps } from 'next-themes'
 
 type ThemeProviderProps = BaseThemeProviderProps
 

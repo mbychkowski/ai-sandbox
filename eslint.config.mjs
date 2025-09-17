@@ -21,6 +21,12 @@ const eslintConfig = [
   }),
 
   {
+    rules: {
+      quotes: ["error", "single"],
+    },
+  },
+
+  {
     ignores: [
       "node_modules/**",
       ".next/**",

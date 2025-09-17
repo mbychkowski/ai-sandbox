@@ -2,8 +2,8 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { Toaster } from 'sonner';
 
+import { Sidebar } from '@/components/Sidebar';
 import ThemeProvider from '@/components/theme/theme-provider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -22,8 +22,12 @@ export default function RootLayout({
     <html suppressHydrationWarning lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          {children}
-          <Toaster />
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 flex flex-col items-center p-4 sm:p-6 md:p-8">
+              {children}
+            </main>
+          </div>
         </ThemeProvider>
       </body>
     </html>

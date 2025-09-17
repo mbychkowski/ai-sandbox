@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 
 import { Spinner } from '@/components/Spinner';
+import ThemeSwitcher from '@/components/theme/theme-switcher';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChatList } from '@/features/chat/components/chat-list';
 import { ChatSaveButton } from '@/features/chat/components/chat-save-button';
 import { NewChatButton } from '@/features/chat/components/new-chat-button';
-import ThemeSwitcher from '@/components/theme/theme-switcher';
 
 export function Sidebar() {
   return (

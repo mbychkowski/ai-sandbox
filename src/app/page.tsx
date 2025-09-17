@@ -1,16 +1,9 @@
 import { ChatPanel } from '@/components/ChatPanel';
-import { Sidebar } from '@/components/Sidebar';
 
-export default function Home() {
+export default function Page() {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 flex flex-col">
-        <ChatPanel
-          chatId={''}
-          initialMessages={[]}
-        />
-      </main>
+    <div className="w-full max-w-3xl mx-auto flex flex-col flex-grow h-full">
+      <ChatPanel />
     </div>
   );
 }
