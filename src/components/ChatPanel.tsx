@@ -1,12 +1,13 @@
 "use client";
 
+import { useChat } from "@ai-sdk/react";
+import { UIMessage } from "ai";
+import { useEffect, useRef, useState } from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useEffect, useRef, useState } from "react";
-import { UIMessage } from "ai";
-import { useChat } from "@ai-sdk/react";
 
 // The ChatPanel is now a "dumb" component that receives all state and handlers as props
 export function ChatPanel({
@@ -47,7 +48,7 @@ export function ChatPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+    <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-4">
           {messages.map((message) => (
@@ -94,7 +95,7 @@ export function ChatPanel({
           ))}
         </div>
       </ScrollArea>
-      <div className="p-4 bg-gray-100 dark:bg-gray-900">
+      <div className="p-4">
         <form onSubmit={handleSubmit} className="flex items-center gap-4">
           <Input
             name="message"

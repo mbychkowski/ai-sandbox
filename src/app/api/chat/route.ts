@@ -1,6 +1,6 @@
-import { createVertex } from '@ai-sdk/google-vertex';
 import {GoogleGenerativeAIProviderOptions} from '@ai-sdk/google'
-import { streamText, UIMessage, convertToModelMessages, tool, stepCountIs } from 'ai';
+import { createVertex } from '@ai-sdk/google-vertex';
+import { convertToModelMessages, stepCountIs,streamText, tool, UIMessage } from 'ai';
 import { z } from 'zod';
 
 const vertex = createVertex({
