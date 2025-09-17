@@ -5,6 +5,7 @@ import { UIMessage } from 'ai';
 import { SendHorizonal } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { BlinkingLoader } from '@/components/BlinkingLoader';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,6 +17,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Spinner } from './Spinner';
 
 export function ChatPanel({
   chatId,
@@ -28,7 +30,7 @@ export function ChatPanel({
 
   const [input, setInput] = useState('');
 
-  const { messages, sendMessage } = useChat({
+  const { messages, sendMessage, status } = useChat({
     messages: initialMessages
   });
 
@@ -60,7 +62,10 @@ export function ChatPanel({
           This is a demo of the Gemini Pro model with the Vercel AI SDK.
         </CardDescription>
       </CardHeader>
-      <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto p-6">
+      <CardContent
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto p-6"
+      >
         <div className="flex flex-col gap-4">
           {messages.map((message) => (
             <div
@@ -71,7 +76,7 @@ export function ChatPanel({
             >
               {message.role !== 'user' && (
                 <Avatar>
-                  <AvatarImage src="/gemini-avatar.png" />
+                  <AvatarImage src="/Gemini_icon_full-color-rgb.svg" />
                   <AvatarFallback>G</AvatarFallback>
                 </Avatar>
               )}
@@ -106,6 +111,12 @@ export function ChatPanel({
             </div>
           ))}
         </div>
+        {(
+          (status === 'submitted') &&
+          <div className="flex justify-end pt-12">
+            <BlinkingLoader />
+          </div>
+        )}
       </CardContent>
       <CardFooter className="p-4 border-t">
         <form
@@ -117,7 +128,7 @@ export function ChatPanel({
             onChange={handleInputChange}
             placeholder="Mr Anderson..."
           />
-          <Button type="submit" size="icon" disabled={!input.trim()}>
+          <Button type="submit" size="icon" disabled={!input.trim() || (status === 'streaming')}>
             <SendHorizonal className="h-4 w-4" />
             <span className="sr-only">Send</span>
           </Button>

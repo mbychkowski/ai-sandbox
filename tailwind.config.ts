@@ -53,23 +53,27 @@ export default {
   			}
   		},
   		keyframes: {
-  			'fade-in-from-top': {
-  				from: {
-  					opacity: '0',
-  					transform: 'translateY(-16px)'
-  				},
-  				to: {
-  					opacity: '1',
-  					transform: 'translateY(0)'
-  				}
-  			}
-  		},
-  		animation: {
-  			'fade-in-from-top': 'fade-in-from-top 0.5s ease-in-out'
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
+  			      'fade-in-from-top': {
+  			  				from: {
+  			  					opacity: '0',
+  			  					transform: 'translateY(-16px)'
+  			  				},
+  			  				to: {
+  			  					opacity: '1',
+  			  					transform: 'translateY(0)'
+  			  				}
+  			  			},
+  			        'blink': {
+  			          '0%, 100%': { opacity: '0.2' },
+  			          '50%': { opacity: '1' },
+  			        }
+  			  		},
+  			  		animation: {
+  			  			'fade-in-from-top': 'fade-in-from-top 0.5s ease-in-out',
+  			        'blink': 'blink 1.4s infinite ease-in-out both',
+  			  		},
+  			  		borderRadius: {
+  			  			lg: 'var(--radius)',  			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		}
   	}
